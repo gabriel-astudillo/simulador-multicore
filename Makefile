@@ -2,6 +2,8 @@ CC=gcc
 CXX=g++
 RM=rm -f
 
+#Ruta a la libreria libcppsim. 
+#MODIFICAR segun sea el caso.
 INCLUDES=-I../../libcppsim-0.2.5/src/
 LDFLAGS=-L../../libcppsim-0.2.5/src/
 LDLIBS=-lm -lcppsim 
