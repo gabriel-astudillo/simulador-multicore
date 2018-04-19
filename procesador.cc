@@ -110,13 +110,7 @@ void Procesador::agregarTarea(Tarea* tarea){
 void Procesador::asociarCores(){
 	for(uint8_t i=0; i < totalCores; i++){
 		cores.push_back(new coreSim(string("Core") + string(std::to_string(i)) ));
-	}
-	
-	std::list< handle<coreSim> >::iterator indexCore;
-	indexCore = cores.begin();
-	while( indexCore != cores.end() ){
-		(*indexCore)->asociarProcesador(this);
-		indexCore++;
+		cores.back()->asociarProcesador(this);
 	}
 }
 
