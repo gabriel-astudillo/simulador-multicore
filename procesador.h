@@ -15,25 +15,25 @@ private:
 	list< handle<coreSim> > cores;
 	
 	uint8_t L2; /*Tamaño memoria cache L2*/
+	uint8_t totalCores;
 	bool esperandoPorCore;
 
+	void asociarCores();
+	
 	
 protected:
 	void inner_body();
 	
 public:
-	Procesador(const string& _name);
+	Procesador(const string& _name, uint8_t _totalCores);
 	
 	virtual ~Procesador();
 	
 	void agregarTarea(Tarea* tarea);
 	
-	void asociarCore(list< handle<coreSim> > _cores);
-	
 	bool filaTareasEstaVacia();
 	
 	bool estaEsperandoPorCore();
-	
 
 };
 

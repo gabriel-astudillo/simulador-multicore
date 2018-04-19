@@ -2,18 +2,29 @@
 #include "procesador.h"
 
 
-Procesador::Procesador(const string& _name) : process(_name) {
+Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name) {
 	L2 = 40; /* Cantidad máxima de datos en L2 */
 	
 	name = _name;
+	totalCores = _totalCores;
 	esperandoPorCore = false;
 	
 	registro = new Registro();
+	
+	asociarCores();
+	
 }
 
 
 void Procesador::inner_body(){
 	Tarea *tarea;
+	
+	std::list< handle<coreSim> >::iterator indexCore;
+	indexCore = cores.begin();
+	while( indexCore != cores.end() ){
+		(*indexCore)->activate();
+		indexCore++;
+	}
 	
 	while(1){
 		
@@ -51,15 +62,12 @@ void Procesador::inner_body(){
 			while( indexCore != cores.end() && tarea != NULL){
 				if( ! (*indexCore)->tieneTareaAsignada() ){
 					esperandoPorCore = false;
-					(*indexCore)->agregarTarea(tarea);
+					(*indexCore)->agregarTarea(tarea);	
 				
-				
-					//registro->print(this->time(), name, string("FIN Asignación tarea id:") + string(std::to_string(tarea->getID())) );
 					if( (*indexCore)->idle() ){
 						registro->print(this->time(), name, 
 							string("FIN Asignación tarea id:") + string(std::to_string(tarea->getID())) + string(" --> ") + (*indexCore)->getName()
 							);						
-						//registro->print(this->time(), name, string("Activando ") + (*indexCore)->getName() );
 						(*indexCore)->activate();
 					}
 				
@@ -70,7 +78,7 @@ void Procesador::inner_body(){
 				}
 				
 				indexCore++;
-			}
+			} //FIN ciclo de revisión de cores
 			
 			/*
 				Si la tarea no fue asignada (todos los cores tienen una),
@@ -80,14 +88,16 @@ void Procesador::inner_body(){
 			*/
 			if( tarea != NULL ){
 				esperandoPorCore = true;
-				registro->print(this->time(), name, string("Esperando por core para tarea id:") + string(std::to_string(tarea->getID() )));
+				registro->print(this->time(), name, 
+					string("Esperando por core para tarea id:") + string(std::to_string(tarea->getID() ))
+					);
 				passivate();
 			}
 			else{
 				break;
 			}
 			
-		}	
+		} //FIN Ciclo de asignación de tareas	
 		
 	}
 	
@@ -97,8 +107,17 @@ void Procesador::agregarTarea(Tarea* tarea){
 	filaTareas.push_back(tarea);
 }
 
-void Procesador::asociarCore(list< handle<coreSim> > _cores){
-	cores = _cores;
+void Procesador::asociarCores(){
+	for(uint8_t i=0; i < totalCores; i++){
+		cores.push_back(new coreSim(string("Core") + string(std::to_string(i)) ));
+	}
+	
+	std::list< handle<coreSim> >::iterator indexCore;
+	indexCore = cores.begin();
+	while( indexCore != cores.end() ){
+		(*indexCore)->asociarProcesador(this);
+		indexCore++;
+	}
 }
 
 bool Procesador::filaTareasEstaVacia(){
@@ -161,7 +180,6 @@ void coreSim::inner_body(){
 }
 
 void coreSim::agregarTarea(Tarea* _tarea){
-	//filaTareas.push_back(_tarea);
 	tarea = _tarea;
 }
 
@@ -181,6 +199,7 @@ bool coreSim::tieneTareaAsignada(){
 string coreSim::getName(){
 	return(name);
 }
+
 coreSim::~coreSim(){
 	
 }
