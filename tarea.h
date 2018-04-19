@@ -7,6 +7,8 @@ private:
 	uint32_t id;
 	double tServicio;
 	
+	list<char> datos;
+	
 protected:
 	
 	
@@ -22,6 +24,22 @@ public:
 	
 	double getTservicio(){
 		return(tServicio);
+	}
+	
+	void agregarDato(char dato){
+		datos.push_back(dato);
+	}
+	
+	void verDatos(){
+		list<char>::iterator indexDato;
+		
+		indexDato = datos.begin();
+		
+		while( indexDato != datos.end() ){
+			std::cout << *indexDato << " ";
+			indexDato++;
+		}
+		std::cout << std::endl;
 	}
 	
 };
