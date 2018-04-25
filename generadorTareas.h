@@ -10,7 +10,6 @@ private:
 	uint32_t     totalTareas;
 	string       name;
 	
-	//handle<coreSim>    core;
 	handle<Procesador> procesador;
 	
 	Registro *registro;
@@ -20,10 +19,7 @@ protected:
 	
 public:
 	generadorTareas(const string& _name, uint32_t totalTareas);
-	
 	virtual ~generadorTareas();
-
-	
 	void asociarProcesador(handle<Procesador> _procesador);
 };
 

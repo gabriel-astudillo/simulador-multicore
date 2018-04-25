@@ -1,17 +1,22 @@
 #include "glob.h"
 #include "procesador.h"
+#include "tarea.h"
 
 
 Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name) {
-	L2 = 40; /* Cantidad máxima de datos en L2 */
+	size_L2 = 40; /* Cantidad máxima de datos en L2 */
 	
 	name = _name;
 	totalCores = _totalCores;
 	esperandoPorCore = false;
 	
 	registro = new Registro();
+	mem_L2   = new Memoria(L2, size_L2);
 	
 	asociarCores();
+	
+	registro->print(this->time(), name , 
+		string("Contenido inicial L2:") + mem_L2->verDatos());
 	
 }
 
@@ -131,11 +136,15 @@ Procesador::~Procesador(){
 
 
 coreSim::coreSim(const string& _name) : process(_name) {
-	L1 = 15; /* Cantidad de datos de la memoria L1 */
+	size_L1 = 15; /* Cantidad de datos de la memoria L1 */
 	
 	name = _name;
 	
 	registro = new Registro();
+	mem_L1   = new Memoria(L1, size_L1);
+	
+	//registro->print(this->time(), name , 
+	//	string("Contenido inicial L1:") + mem_L1->verDatos());
 }
 
 
@@ -144,20 +153,45 @@ void coreSim::inner_body(){
 	while(1){
 	
 		if(tarea == NULL){
-			std::cout << std::setw(TIME_WIDTH) << std::fixed <<this->time() << 
-				": " << name << ": Sin tarea, idle" << std::endl;
+			registro->print(this->time(), name , "Sin tarea, idle");
 			passivate();
 		}
 		
-		std::cout << std::setw(TIME_WIDTH) << std::fixed << this->time() << 
-			": " << name << ": INICIO tarea id:" << tarea->getID() << 
-			", tServicio:" << tarea->getTservicio() << std::endl;
+		registro->print(this->time(), name , 
+			string("INICIO tarea id:") + 
+			string( std::to_string(tarea->getID())) + 
+			string(", tServicio:") + 
+			string(std::to_string(tarea->getTservicio()) ));
+			
 		
-		/*Simular procesamiento de la tarea*/
-		hold( tarea->getTservicio() );
+		/*==Simular procesamiento de la tarea==*/
+		/*
+			Cada tarea tiene cierta cantidad de datos que procesar.
+				==> Hay que recorrer la lista de datos de la tarea
+			Suposición: 
+				El tiempo de servicio de la tarea es lo que se
+				demora cada dato en procesar
+		*/	
 		
-		std::cout << std::setw(TIME_WIDTH) << std::fixed << this->time() << 
-			": " << name << ": FIN    tarea id:" << tarea->getID() << std::endl;
+		while( !tarea->datos.empty() ){
+			char datoProcesar;
+			
+			datoProcesar = tarea->datos.front();
+			tarea->datos.pop_front();
+			
+			registro->print(this->time(), name , 
+				string("PROCESAMIENTO tarea id:") + 
+				string( std::to_string(tarea->getID())) + 
+				string(", Dato:") + 
+				datoProcesar);
+				
+			hold( tarea->getTservicio() );	
+		}
+			
+		
+		registro->print(this->time(), name, 
+			string("FIN    tarea id:") + 
+			string(std::to_string(tarea->getID()) ));
 		
 		
 		tarea = NULL;
@@ -165,8 +199,7 @@ void coreSim::inner_body(){
 		//ACTIVAR EL PROCESADOR SI ESTA IDLE
 		//A CAUSA DE ESTAR ESPERANDO UN CORE LIBRE
 		if( procesador->idle() && procesador->estaEsperandoPorCore() ){
-			std::cout << std::setw(TIME_WIDTH) << std::fixed << this->time() << 
-				": " << name << ": Activando Procesador" <<std::endl;
+			registro->print(this->time(), name, "Activando Procesador");
 			procesador->activate();
 		}
 	}

@@ -20,6 +20,9 @@
 #include <random>
 
 #define TIME_WIDTH 12
+
+typedef enum {L1, L2} t_memoria;
+
 using namespace std;
 
 
