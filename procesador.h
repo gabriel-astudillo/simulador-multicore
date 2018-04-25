@@ -33,6 +33,7 @@ public:
 	void agregarTarea(Tarea* tarea);
 	bool filaTareasEstaVacia();
 	bool estaEsperandoPorCore();
+	t_dataStatus buscarDatoEnMemoria(char datoBuscar);
 
 };
 
@@ -59,6 +60,8 @@ public:
 	void asociarProcesador(handle<Procesador> _procesador);
 	bool tieneTareaAsignada();
 	string getName();
+	t_dataStatus buscarDatoEnMemoria(char datoBuscar);
+	
 };
 
 

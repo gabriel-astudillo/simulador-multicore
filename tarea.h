@@ -8,8 +8,6 @@ private:
 	uint32_t id;
 	double tServicio;
 	
-	
-	
 	void asignarDatos();
 	void agregarDato(char dato);
 	

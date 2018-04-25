@@ -20,6 +20,7 @@ public:
 	Memoria(t_memoria _tipo, uint8_t _capacidad);
 	std::string verDatos();
 	void ponerDato(char dato);
+	t_dataStatus buscarDato(char dato);
 	
 	
 };

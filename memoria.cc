@@ -13,15 +13,44 @@ std::string Memoria::verDatos(){
 	return (*datosEnMemoria);
 }
 
-void Memoria::ponerDato(char dato){
+void Memoria::ponerDato(char datoNuevo){
+	/*
+	*	Si datoNuevo está en memoria, no hace nada.
+	*	Si datoNuevo no está en memoria, reemplaza el dato
+	*	que está en la dirección 'pos' por datoNuevo
+	*
+	*	La dirección 'pos' está entre 0 y capacidad-1
+	*/
 	
-	std::size_t datoEncontrado = datosEnMemoria->find_first_of(dato);
+	std::size_t datoEncontrado = datosEnMemoria->find_first_of(datoNuevo);
 	
 	if( datoEncontrado == std::string::npos ){
-		/* No se encontró el dato 
+		/* 
+		*  No se encontró el dato 
 		*  Se almacena en la posición 'pos'
 		*/
-		(*datosEnMemoria)[pos%capacidad] = dato;		
+		(*datosEnMemoria)[pos] = datoNuevo;
+		
+		pos++;
+		pos = pos%capacidad;		
 	}
+}
+
+t_dataStatus Memoria::buscarDato(char datoBuscar){
+	t_dataStatus dataStatus;
+	
+	std::size_t datoEncontrado = datosEnMemoria->find_first_of(datoBuscar);
+	
+	if( datoEncontrado == std::string::npos ){
+		/*
+			No se encontró datoBuscar
+		*/
+		dataStatus = DATA_FAIL;
+	}
+	else{
+		dataStatus = DATA_OK;
+	}
+	
+	return(dataStatus);
 }
 

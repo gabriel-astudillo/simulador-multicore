@@ -22,6 +22,7 @@
 #define TIME_WIDTH 12
 
 typedef enum {L1, L2} t_memoria;
+typedef enum {DATA_OK, DATA_FAIL} t_dataStatus;
 
 using namespace std;
 

@@ -127,6 +127,10 @@ bool Procesador::estaEsperandoPorCore(){
 	return( esperandoPorCore );
 }
 
+t_dataStatus Procesador::buscarDatoEnMemoria(char datoBuscar){
+	return( mem_L2->buscarDato(datoBuscar) );
+}
+
 Procesador::~Procesador(){
 	
 }
@@ -157,10 +161,10 @@ void coreSim::inner_body(){
 			passivate();
 		}
 		
-		registro->print(this->time(), name , 
-			string("INICIO tarea id:") + 
-			string( std::to_string(tarea->getID())) + 
-			string(", tServicio:") + 
+		registro->print(this->time(), name , \
+			string("INICIO tarea id:") +     \
+			string( std::to_string(tarea->getID())) + \
+			string(", tServicio:") +  \
 			string(std::to_string(tarea->getTservicio()) ));
 			
 		
@@ -179,20 +183,69 @@ void coreSim::inner_body(){
 			datoProcesar = tarea->datos.front();
 			tarea->datos.pop_front();
 			
-			registro->print(this->time(), name , 
-				string("PROCESAMIENTO tarea id:") + 
-				string( std::to_string(tarea->getID())) + 
-				string(", Dato:") + 
-				datoProcesar);
+			registro->print(this->time(), name , \
+				string("PROCESAMIENTO tarea id:") + \
+				string( std::to_string(tarea->getID())) + \
+				string(", Dato:") + \
+				datoProcesar \
+			);
 				
+			// Revisar si datoProcesar está en L1
+			t_dataStatus dataStatus_L1, dataStatus_L2;
+			
+			dataStatus_L1 = this->buscarDatoEnMemoria(datoProcesar);
+			
+			if( dataStatus_L1 == DATA_FAIL ){
+				/* 'datoProcesar' no está en memoria L1 */
+				registro->print(this->time(), name , \
+					string("PROCESAMIENTO tarea id:") + \
+					string( std::to_string(tarea->getID())) + \
+					string(", Dato:") + \
+					datoProcesar + \
+					string(" DATA_FAIL en L1") \
+				);
+				
+				// Revisar si datoProcesar está en L2
+				// Buscar el dato en L2
+				dataStatus_L2 = procesador->buscarDatoEnMemoria(datoProcesar);
+				if( dataStatus_L2 == DATA_FAIL ){
+					/* 'datoProcesar' no está en memoria L2 */
+					registro->print(this->time(), name , \
+						string("PROCESAMIENTO tarea id:") + \
+						string( std::to_string(tarea->getID())) + \
+						string(", Dato:") + \
+						datoProcesar + \
+						string(" DATA_FAIL en L2") \
+					);
+					//Transferir desde RAM hacia L2 (hay costo de transferencia) FALTA
+					//Transferir desde L2 a L1 (hay costo de transferencia)		 FALTA				
+				}
+				else{
+					/* 'datoProcesar' sí está en memoria L2 */
+					registro->print(this->time(), name , \
+						string("PROCESAMIENTO tarea id:") + \
+						string( std::to_string(tarea->getID())) + \
+						string(", Dato:") + \
+						datoProcesar + \
+						string(" DATA_OK en L2") \
+					);
+					//Transferir desde L2 a L1 (hay costo de transferencia)		FALTA			
+				}									
+			}
+			
+			
+			/*
+				Una vez que datoProcesar está en L1,  
+				se puede procesar
+			*/
 			hold( tarea->getTservicio() );	
 		}
 			
 		
-		registro->print(this->time(), name, 
-			string("FIN    tarea id:") + 
-			string(std::to_string(tarea->getID()) ));
-		
+		registro->print(this->time(), name, \
+			string("FIN    tarea id:") +  \
+			string(std::to_string(tarea->getID()) ) \
+		);
 		
 		tarea = NULL;
 		
@@ -225,6 +278,10 @@ bool coreSim::tieneTareaAsignada(){
 
 string coreSim::getName(){
 	return(name);
+}
+
+t_dataStatus coreSim::buscarDatoEnMemoria(char datoBuscar){
+	return( mem_L1->buscarDato(datoBuscar) );
 }
 
 coreSim::~coreSim(){
