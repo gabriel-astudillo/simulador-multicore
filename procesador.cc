@@ -3,7 +3,7 @@
 #include "tarea.h"
 
 
-Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name) {
+Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name), Memoria() {
 	size_L2 = 40; /* Cantidad máxima de datos en L2 */
 	
 	name = _name;
@@ -11,12 +11,13 @@ Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name
 	esperandoPorCore = false;
 	
 	registro = new Registro();
-	mem_L2   = new Memoria(L2, size_L2);
+	
+	Memoria::configuraMemoria(L2, size_L2);
 	
 	asociarCores();
 	
 	registro->print(this->time(), name , 
-		string("Contenido inicial L2:") + mem_L2->verDatos());
+		string("Contenido inicial L2:") + this->verDatos());
 	
 }
 
@@ -114,8 +115,12 @@ void Procesador::agregarTarea(Tarea* tarea){
 
 void Procesador::asociarCores(){
 	for(uint8_t i=0; i < totalCores; i++){
-		cores.push_back(new coreSim(string("Core") + string(std::to_string(i)) ));
-		cores.back()->asociarProcesador(this);
+		coreSim *core;
+		
+		core = new coreSim(string("Core") + string(std::to_string(i)) );
+		core->asociarProcesador(this);
+		
+		cores.push_back(core);
 	}
 }
 
@@ -127,10 +132,6 @@ bool Procesador::estaEsperandoPorCore(){
 	return( esperandoPorCore );
 }
 
-t_dataStatus Procesador::buscarDatoEnMemoria(char datoBuscar){
-	return( mem_L2->buscarDato(datoBuscar) );
-}
-
 Procesador::~Procesador(){
 	
 }
@@ -139,16 +140,16 @@ Procesador::~Procesador(){
 ///////////////////////////
 
 
-coreSim::coreSim(const string& _name) : process(_name) {
-	size_L1 = 15; /* Cantidad de datos de la memoria L1 */
-	
+coreSim::coreSim(const string& _name) : process(_name), Memoria() {	
+	size_L1 = 15; /* Cantidad máxima de datos en L1 */
 	name = _name;
 	
 	registro = new Registro();
-	mem_L1   = new Memoria(L1, size_L1);
+	
+	Memoria::configuraMemoria(L1, size_L1);
 	
 	//registro->print(this->time(), name , 
-	//	string("Contenido inicial L1:") + mem_L1->verDatos());
+	//	string("Contenido inicial L1:") + this->verDatos());
 }
 
 
@@ -193,7 +194,7 @@ void coreSim::inner_body(){
 			// Revisar si datoProcesar está en L1
 			t_dataStatus dataStatus_L1, dataStatus_L2;
 			
-			dataStatus_L1 = this->buscarDatoEnMemoria(datoProcesar);
+			dataStatus_L1 = this->buscarDato(datoProcesar);
 			
 			if( dataStatus_L1 == DATA_FAIL ){
 				/* 'datoProcesar' no está en memoria L1 */
@@ -207,7 +208,7 @@ void coreSim::inner_body(){
 				
 				// Revisar si datoProcesar está en L2
 				// Buscar el dato en L2
-				dataStatus_L2 = procesador->buscarDatoEnMemoria(datoProcesar);
+				dataStatus_L2 = procesador->buscarDato(datoProcesar);
 				if( dataStatus_L2 == DATA_FAIL ){
 					/* 'datoProcesar' no está en memoria L2 */
 					registro->print(this->time(), name , \
@@ -217,8 +218,12 @@ void coreSim::inner_body(){
 						datoProcesar + \
 						string(" DATA_FAIL en L2") \
 					);
-					//Transferir desde RAM hacia L2 (hay costo de transferencia) FALTA
-					//Transferir desde L2 a L1 (hay costo de transferencia)		 FALTA				
+					//Transferir desde RAM hacia L2 (hay costo de transferencia) 
+					procesador->ponerDato(datoProcesar);
+					hold( TR_RAM_L2 );	
+					//Transferir desde L2 a L1 (hay costo de transferencia)		 	
+					this->ponerDato(datoProcesar);	
+					hold( TR_L2_L1 );			
 				}
 				else{
 					/* 'datoProcesar' sí está en memoria L2 */
@@ -229,16 +234,26 @@ void coreSim::inner_body(){
 						datoProcesar + \
 						string(" DATA_OK en L2") \
 					);
-					//Transferir desde L2 a L1 (hay costo de transferencia)		FALTA			
+					//Transferir desde L2 a L1 (hay costo de transferencia)			
+					this->ponerDato(datoProcesar);	
+					hold( TR_L2_L1 );			
 				}									
 			}
 			
-			
-			/*
-				Una vez que datoProcesar está en L1,  
-				se puede procesar
+			/* 
+			*   'datoProcesar' sí está en memoria L1 
+			*   se puede procesar  
 			*/
+			registro->print(this->time(), name , \
+				string("PROCESAMIENTO tarea id:") + \
+				string( std::to_string(tarea->getID())) + \
+				string(", Dato:") + \
+				datoProcesar + \
+				string(" DATA_OK en L1") \
+			);
+
 			hold( tarea->getTservicio() );	
+
 		}
 			
 		
@@ -278,10 +293,6 @@ bool coreSim::tieneTareaAsignada(){
 
 string coreSim::getName(){
 	return(name);
-}
-
-t_dataStatus coreSim::buscarDatoEnMemoria(char datoBuscar){
-	return( mem_L1->buscarDato(datoBuscar) );
 }
 
 coreSim::~coreSim(){

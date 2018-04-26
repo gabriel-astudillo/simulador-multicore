@@ -7,7 +7,7 @@
 class coreSim ;
 class Procesador;
 
-class Procesador : public process {
+class Procesador : public process, public Memoria {
 private:
 	string name;
 	list<Tarea*> filaTareas; /*Tareas a repartir entre los cores*/
@@ -16,7 +16,6 @@ private:
 	list< handle<coreSim> > cores;
 	
 	uint8_t size_L2; /*Tamaño memoria cache L2*/
-	Memoria *mem_L2;
 	
 	uint8_t totalCores;
 	bool esperandoPorCore;
@@ -33,17 +32,12 @@ public:
 	void agregarTarea(Tarea* tarea);
 	bool filaTareasEstaVacia();
 	bool estaEsperandoPorCore();
-	t_dataStatus buscarDatoEnMemoria(char datoBuscar);
 
 };
 
-class coreSim : public process {
+class coreSim : public process, public Memoria{
 private:
-	list<Tarea*> filaTareas;
-	uint8_t size_L1; /* tamaño memoria L1 */
-	
-	Memoria *mem_L1;
-	
+	uint8_t size_L1; /*Tamaño memoria cache L1*/
 	string name;
 	Registro *registro;
 	
@@ -60,7 +54,7 @@ public:
 	void asociarProcesador(handle<Procesador> _procesador);
 	bool tieneTareaAsignada();
 	string getName();
-	t_dataStatus buscarDatoEnMemoria(char datoBuscar);
+
 	
 };
 

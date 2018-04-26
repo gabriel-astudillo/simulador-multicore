@@ -21,6 +21,13 @@
 
 #define TIME_WIDTH 12
 
+/*
+*	Tiempos de transferencia
+*	entre las distintas memorias
+*/
+#define TR_L2_L1   2.0
+#define TR_RAM_L2  2.0
+
 typedef enum {L1, L2} t_memoria;
 typedef enum {DATA_OK, DATA_FAIL} t_dataStatus;
 

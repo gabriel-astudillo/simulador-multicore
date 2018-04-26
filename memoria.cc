@@ -1,12 +1,24 @@
 #include "glob.h"
 #include "memoria.h"
 
+
+Memoria::Memoria(){
+	
+}
+
 Memoria::Memoria(t_memoria _tipo, uint8_t _capacidad){
 	tipo      = _tipo;
 	capacidad = _capacidad;
 	
 	datosEnMemoria = new std::string(capacidad, 'x');
 	
+}
+
+void Memoria::configuraMemoria(t_memoria _tipo, uint8_t _capacidad){
+	tipo      = _tipo;
+	capacidad = _capacidad;
+	
+	datosEnMemoria = new std::string(capacidad, 'x');
 }
 
 std::string Memoria::verDatos(){
