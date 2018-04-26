@@ -179,14 +179,13 @@ void coreSim::inner_body(){
 				El tiempo de servicio de la tarea es lo que se
 				demora cada dato en procesar
 		*/	
+		tarea->setTInicioServicio(this->time());
 		
 		while( !tarea->datos.empty() ){
 			char datoProcesar;
 			
 			datoProcesar = tarea->datos.front();
 			tarea->datos.pop_front();
-			
-			tarea->setTInicioServicio(this->time());
 			
 			registro->print(this->time(), name , \
 				string("PROCESAMIENTO tarea id:") + \
@@ -263,7 +262,7 @@ void coreSim::inner_body(){
 		tarea->setTFinServicio(this->time());
 		registro->print(this->time(), name, \
 			string("FIN    tarea id:") +  \
-			string(std::to_string(tarea->getID()) ) \
+			string(std::to_string(tarea->getID()) )
 		);
 		
 		
