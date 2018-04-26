@@ -7,11 +7,9 @@ Memoria::Memoria(){
 }
 
 Memoria::Memoria(t_memoria _tipo, uint8_t _capacidad){
-	tipo      = _tipo;
-	capacidad = _capacidad;
 	
-	datosEnMemoria = new std::string(capacidad, 'x');
-	
+	configuraMemoria( _tipo,  _capacidad);
+
 }
 
 void Memoria::configuraMemoria(t_memoria _tipo, uint8_t _capacidad){
@@ -27,9 +25,9 @@ std::string Memoria::verDatos(){
 
 void Memoria::ponerDato(char datoNuevo){
 	/*
-	*	Si datoNuevo está en memoria, no hace nada.
-	*	Si datoNuevo no está en memoria, reemplaza el dato
-	*	que está en la dirección 'pos' por datoNuevo
+	*	Si 'datoNuevo' está en memoria, no hace nada.
+	*	Si 'datoNuevo' no está en memoria, reemplaza el dato
+	*	que está en la dirección 'pos' por 'datoNuevo'
 	*
 	*	La dirección 'pos' está entre 0 y capacidad-1
 	*/

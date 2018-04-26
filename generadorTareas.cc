@@ -25,7 +25,7 @@ void generadorTareas::inner_body(){
 	for(uint32_t tareaID=0; tareaID < totalTareas; tareaID+=1){
 		registro->print(this->time(), name, string("Arribo Tarea id:")+string(std::to_string(tareaID)) );
 		
-		tarea = new Tarea( tareaID);
+		tarea = new Tarea( tareaID, this->time() );
 		//tarea->verDatos();
 		
 		procesador->agregarTarea(tarea);

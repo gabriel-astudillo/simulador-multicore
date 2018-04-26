@@ -4,6 +4,14 @@
 #include "generadorTareas.h"
 #include "procesador.h"
 
+/*
+extern counter* tareasFinalizadas;
+extern statistic* tiempoEsperaReady;   //tiempo de espera en fila ready (ingreso al procesador)
+extern statistic* tiempoServicio;      //tiempo de servicio (inicio->fin de la ejecución en un core)
+extern statistic* tput;                //throughput
+extern statistic* tiempoEsperaMemoria; //tiempo de espera debido a transferencia de datos entre memorias
+*/
+
 class sistema: public process {
 	
 private:
@@ -49,13 +57,10 @@ void sistema::inner_body( void ){
 
 }
 
-
 int main( int argc, char* argv[] ){
 
 	check_args(argc, argv);
 	
-	
-
 	simulation::instance()->begin_simulation( new sqsDll( ) );
 
 	handle<sistema> system = new sistema("System main", 
@@ -70,6 +75,16 @@ int main( int argc, char* argv[] ){
 
 	simulation::instance()->end_simulation();
 	std::cout << std::endl << "done!" << std::endl;
+	
+	
+	try{
+		std::cout << "----" << std::endl;
+		g_tiempoServicio->report();
+		
+	} catch (runtime_error& e){
+		std::cerr << "Error: " << e.what() <<std::endl;
+	}
+	
 
-	return 0;
+	return(EXIT_SUCCESS);
 }

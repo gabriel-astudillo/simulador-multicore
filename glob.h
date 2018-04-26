@@ -31,20 +31,22 @@
 typedef enum {L1, L2} t_memoria;
 typedef enum {DATA_OK, DATA_FAIL} t_dataStatus;
 
-using namespace std;
+/*
+*	Variables globales para estadisticas
+*/
+extern counter*   g_tareasFinalizadas;
+extern statistic* g_tiempoEsperaReady;   //tiempo de espera en fila ready (ingreso al procesador)
+extern statistic* g_tiempoServicio;      //tiempo de servicio (inicio->fin de la ejecución en un core)
+extern statistic* g_tput;                //throughput
+extern statistic* g_tiempoEsperaMemoria; //tiempo de espera debido a transferencia de datos entre memorias
 
 
 class Registro {
 	
 public:
-	Registro(){
-		
-	}
+	Registro();
 	
-	void print(double tiempo, string quien, string mensaje){
-		std::cout << std::setw(TIME_WIDTH) << std::fixed << tiempo << 
-			": " << quien << ": " << mensaje << std::endl;
-	}
+	void print(double tiempo, string quien, string mensaje);
 	
 };
 

@@ -25,6 +25,7 @@ Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name
 void Procesador::inner_body(){
 	Tarea *tarea;
 	
+	/* Activa los cores asociados al procesador */
 	std::list< handle<coreSim> >::iterator indexCore;
 	indexCore = cores.begin();
 	while( indexCore != cores.end() ){
@@ -89,7 +90,7 @@ void Procesador::inner_body(){
 			/*
 				Si la tarea no fue asignada (todos los cores tienen una),
 			    entonces el procesador debe esperar hasta que uno se 
-				libere.
+				libere. 
 				En caso contrario, debe salir del ciclo de asignación.
 			*/
 			if( tarea != NULL ){
@@ -155,6 +156,7 @@ coreSim::coreSim(const string& _name) : process(_name), Memoria() {
 
 void coreSim::inner_body(){
 	
+	
 	while(1){
 	
 		if(tarea == NULL){
@@ -183,6 +185,8 @@ void coreSim::inner_body(){
 			
 			datoProcesar = tarea->datos.front();
 			tarea->datos.pop_front();
+			
+			tarea->setTInicioServicio(this->time());
 			
 			registro->print(this->time(), name , \
 				string("PROCESAMIENTO tarea id:") + \
@@ -256,11 +260,15 @@ void coreSim::inner_body(){
 
 		}
 			
-		
+		tarea->setTFinServicio(this->time());
 		registro->print(this->time(), name, \
 			string("FIN    tarea id:") +  \
 			string(std::to_string(tarea->getID()) ) \
 		);
+		
+		
+		g_tiempoServicio->update( tarea->getTFinServicio() - tarea->getTInicioServicio() );
+		
 		
 		tarea = NULL;
 		
