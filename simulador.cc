@@ -60,10 +60,10 @@ int main( int argc, char* argv[] ){
 	simulation::instance()->begin_simulation( new sqsDll( ) );
 
 	handle<sistema> system = new sistema("System main", 
-										1e100,                   /*Tiempo total de simulación*/
-										parametros.totalTareas,  /*Cantidad de tareas        */
-										parametros.totalCores    /*Cantidad de cores         */
-										) ;
+						1e100,                   /*Tiempo total de simulación*/
+						parametros.totalTareas,  /*Cantidad de tareas        */
+						parametros.totalCores    /*Cantidad de cores         */
+					) ;
 
 	system->activate();
 
