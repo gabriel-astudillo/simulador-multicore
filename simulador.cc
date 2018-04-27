@@ -4,13 +4,7 @@
 #include "generadorTareas.h"
 #include "procesador.h"
 
-/*
-extern counter* tareasFinalizadas;
-extern statistic* tiempoEsperaReady;   //tiempo de espera en fila ready (ingreso al procesador)
-extern statistic* tiempoServicio;      //tiempo de servicio (inicio->fin de la ejecución en un core)
-extern statistic* tput;                //throughput
-extern statistic* tiempoEsperaMemoria; //tiempo de espera debido a transferencia de datos entre memorias
-*/
+Registro *g_registro;
 
 class sistema: public process {
 	
@@ -61,6 +55,8 @@ int main( int argc, char* argv[] ){
 
 	check_args(argc, argv);
 	
+	g_registro = new Registro(parametros.t_registro);
+	
 	simulation::instance()->begin_simulation( new sqsDll( ) );
 
 	handle<sistema> system = new sistema("System main", 
@@ -78,8 +74,11 @@ int main( int argc, char* argv[] ){
 	
 	
 	try{
-		std::cout << "----" << std::endl;
-		g_tiempoServicio->report();
+		std::cout << "tiempo de Servicio\t" << \
+		g_tiempoServicio->m() << "\t"  << \
+		sqrt(g_tiempoServicio->variance()) << std::endl ;
+		
+		
 		
 	} catch (runtime_error& e){
 		std::cerr << "Error: " << e.what() <<std::endl;

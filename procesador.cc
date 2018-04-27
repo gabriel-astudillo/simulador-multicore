@@ -10,14 +10,12 @@ Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name
 	totalCores = _totalCores;
 	esperandoPorCore = false;
 	
-	registro = new Registro();
-	
 	Memoria::configuraMemoria(L2, size_L2);
 	
 	asociarCores();
 	
-	registro->print(this->time(), name , 
-		string("Contenido inicial L2:") + this->verDatos());
+	g_registro->print(this->time(), name , 
+		string("Memoria L2:") + this->verDatos());
 	
 }
 
@@ -36,7 +34,7 @@ void Procesador::inner_body(){
 	while(1){
 		
 		if( filaTareas.empty() ){
-			registro->print(this->time(), name, "Fila vacía, procesador idle");
+			g_registro->print(this->time(), name, "Fila vacía, procesador idle");
 			esperandoPorCore = false;
 			passivate();
 		}
@@ -44,7 +42,7 @@ void Procesador::inner_body(){
 		tarea = filaTareas.front();
 		filaTareas.pop_front();
 		
-		registro->print(this->time(), name, 
+		g_registro->print(this->time(), name, 
 			string("INICIO Asignación tarea id:") + string(std::to_string(tarea->getID())) + string(", tServicio:" ) + string(std::to_string(tarea->getTservicio()))
 				);
 		
@@ -72,7 +70,7 @@ void Procesador::inner_body(){
 					(*indexCore)->agregarTarea(tarea);	
 				
 					if( (*indexCore)->idle() ){
-						registro->print(this->time(), name, 
+						g_registro->print(this->time(), name, 
 							string("FIN Asignación tarea id:") + string(std::to_string(tarea->getID())) + string(" --> ") + (*indexCore)->getName()
 							);						
 						(*indexCore)->activate();
@@ -95,7 +93,7 @@ void Procesador::inner_body(){
 			*/
 			if( tarea != NULL ){
 				esperandoPorCore = true;
-				registro->print(this->time(), name, 
+				g_registro->print(this->time(), name, 
 					string("Esperando por core para tarea id:") + string(std::to_string(tarea->getID() ))
 					);
 				passivate();
@@ -145,12 +143,10 @@ coreSim::coreSim(const string& _name) : process(_name), Memoria() {
 	size_L1 = 15; /* Cantidad máxima de datos en L1 */
 	name = _name;
 	
-	registro = new Registro();
-	
 	Memoria::configuraMemoria(L1, size_L1);
 	
-	//registro->print(this->time(), name , 
-	//	string("Contenido inicial L1:") + this->verDatos());
+	g_registro->print(this->time(), name , 
+		string("Memoria L1:") + this->verDatos());
 }
 
 
@@ -160,11 +156,11 @@ void coreSim::inner_body(){
 	while(1){
 	
 		if(tarea == NULL){
-			registro->print(this->time(), name , "Sin tarea, idle");
+			g_registro->print(this->time(), name , "Sin tarea, idle");
 			passivate();
 		}
 		
-		registro->print(this->time(), name , \
+		g_registro->print(this->time(), name , \
 			string("INICIO tarea id:") +     \
 			string( std::to_string(tarea->getID())) + \
 			string(", tServicio:") +  \
@@ -187,7 +183,7 @@ void coreSim::inner_body(){
 			datoProcesar = tarea->datos.front();
 			tarea->datos.pop_front();
 			
-			registro->print(this->time(), name , \
+			g_registro->print(this->time(), name , \
 				string("PROCESAMIENTO tarea id:") + \
 				string( std::to_string(tarea->getID())) + \
 				string(", Dato:") + \
@@ -201,7 +197,7 @@ void coreSim::inner_body(){
 			
 			if( dataStatus_L1 == DATA_FAIL ){
 				/* 'datoProcesar' no está en memoria L1 */
-				registro->print(this->time(), name , \
+				g_registro->print(this->time(), name , \
 					string("PROCESAMIENTO tarea id:") + \
 					string( std::to_string(tarea->getID())) + \
 					string(", Dato:") + \
@@ -214,7 +210,7 @@ void coreSim::inner_body(){
 				dataStatus_L2 = procesador->buscarDato(datoProcesar);
 				if( dataStatus_L2 == DATA_FAIL ){
 					/* 'datoProcesar' no está en memoria L2 */
-					registro->print(this->time(), name , \
+					g_registro->print(this->time(), name , \
 						string("PROCESAMIENTO tarea id:") + \
 						string( std::to_string(tarea->getID())) + \
 						string(", Dato:") + \
@@ -224,13 +220,33 @@ void coreSim::inner_body(){
 					//Transferir desde RAM hacia L2 (hay costo de transferencia) 
 					procesador->ponerDato(datoProcesar);
 					hold( TR_RAM_L2 );	
+					g_registro->print(this->time(), name , \
+						string("PROCESAMIENTO tarea id:") + \
+						string( std::to_string(tarea->getID())) + \
+						string(", Dato:") + \
+						datoProcesar + \
+						string(" copiado a L2") \
+					);
+					g_registro->print(this->time(), name , 
+						string("Memoria L2:") + procesador->verDatos());
+						
 					//Transferir desde L2 a L1 (hay costo de transferencia)		 	
 					this->ponerDato(datoProcesar);	
-					hold( TR_L2_L1 );			
+					hold( TR_L2_L1 );	
+					g_registro->print(this->time(), name , \
+						string("PROCESAMIENTO tarea id:") + \
+						string( std::to_string(tarea->getID())) + \
+						string(", Dato:") + \
+						datoProcesar + \
+						string(" copiado a L1") \
+					);
+					g_registro->print(this->time(), name , 
+						string("Memoria L1:") + this->verDatos());
+							
 				}
 				else{
 					/* 'datoProcesar' sí está en memoria L2 */
-					registro->print(this->time(), name , \
+					g_registro->print(this->time(), name , \
 						string("PROCESAMIENTO tarea id:") + \
 						string( std::to_string(tarea->getID())) + \
 						string(", Dato:") + \
@@ -239,7 +255,17 @@ void coreSim::inner_body(){
 					);
 					//Transferir desde L2 a L1 (hay costo de transferencia)			
 					this->ponerDato(datoProcesar);	
-					hold( TR_L2_L1 );			
+					hold( TR_L2_L1 );
+					g_registro->print(this->time(), name , \
+						string("PROCESAMIENTO tarea id:") + \
+						string( std::to_string(tarea->getID())) + \
+						string(", Dato:") + \
+						datoProcesar + \
+						string(" copiado a L1") \
+					);
+					g_registro->print(this->time(), name , 
+						string("Memoria L1:") + this->verDatos());
+								
 				}									
 			}
 			
@@ -247,7 +273,7 @@ void coreSim::inner_body(){
 			*   'datoProcesar' sí está en memoria L1 
 			*   se puede procesar  
 			*/
-			registro->print(this->time(), name , \
+			g_registro->print(this->time(), name , \
 				string("PROCESAMIENTO tarea id:") + \
 				string( std::to_string(tarea->getID())) + \
 				string(", Dato:") + \
@@ -260,13 +286,18 @@ void coreSim::inner_body(){
 		}
 			
 		tarea->setTFinServicio(this->time());
-		registro->print(this->time(), name, \
+		
+		double deltaTimeServicio = tarea->getTFinServicio() - tarea->getTInicioServicio();
+		
+		g_registro->print(this->time(), name, \
 			string("FIN    tarea id:") +  \
-			string(std::to_string(tarea->getID()) )
+			string(std::to_string(tarea->getID()) ) + \
+			string(" servicio:") + \
+			string( std::to_string(deltaTimeServicio) ) \
 		);
 		
 		
-		g_tiempoServicio->update( tarea->getTFinServicio() - tarea->getTInicioServicio() );
+		g_tiempoServicio->update( deltaTimeServicio );
 		
 		
 		tarea = NULL;
@@ -274,7 +305,7 @@ void coreSim::inner_body(){
 		//ACTIVAR EL PROCESADOR SI ESTA IDLE
 		//A CAUSA DE ESTAR ESPERANDO UN CORE LIBRE
 		if( procesador->idle() && procesador->estaEsperandoPorCore() ){
-			registro->print(this->time(), name, "Activando Procesador");
+			g_registro->print(this->time(), name, "Activando Procesador");
 			procesador->activate();
 		}
 	}

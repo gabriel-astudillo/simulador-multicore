@@ -10,6 +10,7 @@ Tarea::Tarea(uint32_t _id, double _tiempoCreacion){
 		tiempoFinServicio    = 0.0;
 		
 		std::default_random_engine gb_random(id*10);
+		//gb_random.seed(std::chrono::system_clock::now().time_since_epoch().count());
 		std::uniform_real_distribution<> uniform(5.33, 10.44);
 		
 		tServicio = uniform(gb_random);	
@@ -39,16 +40,17 @@ double Tarea::getTservicio(){
 }
 
 
-void Tarea::verDatos(){
+std::string Tarea::getDatos(){
 	list<char>::iterator indexDato;
+	std::string *datos_tmp = new std::string();
 	
 	indexDato = datos.begin();
 	
 	while( indexDato != datos.end() ){
-		std::cout << *indexDato << " ";
+		datos_tmp->resize( datos_tmp->size()+1,  *indexDato);
 		indexDato++;
 	}
-	std::cout << std::endl;
+	return(*datos_tmp);
 }
 
 void Tarea::setTInicioServicio(double tiempoInicio){

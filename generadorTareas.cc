@@ -11,8 +11,6 @@ generadorTareas::generadorTareas(const string& _name, uint32_t _totalTareas) : p
 	
 	totalTareas = _totalTareas;
 	name        = _name;
-	
-	registro = new Registro();
 
 }
 
@@ -23,15 +21,19 @@ void generadorTareas::inner_body(){
 	double tHold;
 	
 	for(uint32_t tareaID=0; tareaID < totalTareas; tareaID+=1){
-		registro->print(this->time(), name, string("Arribo Tarea id:")+string(std::to_string(tareaID)) );
 		
 		tarea = new Tarea( tareaID, this->time() );
-		//tarea->verDatos();
+
+		g_registro->print(this->time(), \
+			name, \
+			string("Arribo Tarea id:")+string(std::to_string(tareaID)) + \
+			string(" Datos:") + tarea->getDatos() );
+		
 		
 		procesador->agregarTarea(tarea);
 		
 		if( procesador->idle() && !procesador->estaEsperandoPorCore() ){
-			registro->print(this->time(), name, "Activando Procesador");
+			g_registro->print(this->time(), name, "Activando Procesador");
 			procesador->activate();
 		}
 			

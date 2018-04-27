@@ -12,11 +12,12 @@ extern int optind, opterr, optopt;
 struct args_t  parametros;
 
 void print_usage(char* name){
-	char opciones[] = "-t <nro de tareas> -c <nro de cores>\n";
+	char opciones[] = "-t <nro de tareas> -c <nro de cores> [-v]\n";
 
 	char descripcion[] = "Descripción:\n"
 	                     "\t-t   cantidad de tareas a simular\n"
-						 "\t-c   cantidad de corese del procesador\n";
+						 "\t-c   cantidad de corese del procesador\n"
+						 "\t-v   Muestra en pantalla el registro de la simulacion\n";
 
 	printf("Uso: %s %s\n%s\n", name, opciones, descripcion);
 }
@@ -25,10 +26,11 @@ void print_usage(char* name){
 void check_args(int argc , char **argv){
 	int opcion;
 
-	std::string optString = "t:c:h";
+	std::string optString = "t:c:hv";
 
 	parametros.totalTareas = 0;
 	parametros.totalCores  = 0;
+	parametros.t_registro  = REG_QUIET;
 
 	while ((opcion = getopt (argc, argv, optString.c_str())) != -1){
 		switch (opcion) {
@@ -37,6 +39,9 @@ void check_args(int argc , char **argv){
 					break;
 			case 'c':
 					parametros.totalCores = atoi(optarg);
+					break;
+			case 'v':
+					parametros.t_registro = REG_VERBOSE;
 					break;
 			case 'h':
 			default:

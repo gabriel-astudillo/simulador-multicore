@@ -25,7 +25,7 @@ public:
 
 	uint32_t getID();
 	double getTservicio();
-	void verDatos();
+	std::string getDatos();
 	
 	void setTInicioServicio(double tiempoInicio);
 	void setTFinServicio(double finServicio);

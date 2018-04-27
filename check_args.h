@@ -5,6 +5,7 @@ struct args_t {
    //std::string archivoIndice;
    uint32_t totalTareas;
    uint8_t  totalCores;
+   t_register t_registro;
 };
 
 extern struct args_t parametros;
