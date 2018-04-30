@@ -5,6 +5,7 @@ struct args_t {
    //std::string archivoIndice;
    uint32_t totalTareas;
    uint8_t  totalCores;
+   double   tasaLlegada;
    t_register t_registro;
 };
 

@@ -38,7 +38,9 @@ public:
 class coreSim : public process, public Memoria{
 private:
 	uint8_t size_L1; /*Tamaño memoria cache L1*/
+	
 	string name;
+	uint8_t coreID;
 	Registro *registro;
 	
 	handle<Procesador> procesador;
@@ -48,7 +50,7 @@ protected:
 	void inner_body();
 	
 public:
-	coreSim(const string& _name);
+	coreSim(const string& _name, uint8_t _coreID);
 	virtual ~coreSim();
 	void agregarTarea(Tarea* _tarea);
 	void asociarProcesador(handle<Procesador> _procesador);

@@ -1,22 +1,5 @@
 #include "glob.h"
-
-/*
-*	Indicadores
-*/
-
-counter*   g_tareasFinalizadas   = new counter("Tareas_finalizadas");
-statistic* g_tiempoEsperaReady   = new mean("Espera_en_fila_Ready", .95);
-mean*      g_tiempoServicio      = new mean("Tiempo_servicio", .95);    
-statistic* g_tput                = new mean("Troughput", .95);;               
-statistic* g_tiempoEsperaMemoria = new mean("Espera_por_fallos_en_memoria", .95);
-
-
-/*
-*	Tiempos de transferencia
-*	entre las distintas memorias
-*/
-const double TR_L2_L1   = 2.0;
-const double TR_RAM_L2  = 4.0;
+#include "check_args.h"
 
 /*
 *	Clase Registro
@@ -36,3 +19,32 @@ void Registro::print(double tiempo, string quien, string mensaje){
 	}
 	
 }
+
+/*
+*	Indicadores
+*/
+counter*   g_tareasFinalizadas   = new counter("Tareas_finalizadas");
+mean*      g_tiempoEsperaReady   = new mean("Espera_en_fila_Ready", .95);
+mean*      g_tiempoServicio      = new mean("Tiempo_servicio", .95);    
+mean*      g_tiempoEsperaMemoria = new mean("Espera_por_fallos_en_memoria", .95);
+statistic* g_tput                = new mean("Troughput", .95);;               
+
+histogram* g_hist_tiempoServicio    = new histogram("Tiempo Servicio", 0.0, 100.0, 20);
+histogram* g_hist_tiempoEsperaReady = new histogram("Tiempo Espera Ready", 0.0, 100.0, 20);
+
+/*
+*	Tiempos de transferencia
+*	entre las distintas memorias
+*	(Falta parametrizar con check_args)
+*/
+const double TR_L2_L1   = 0.30;
+const double TR_RAM_L2  = 0.50;
+
+/*
+*	Tamaños L1 y L2
+*	(Falta parametrizar con check_args)
+*/
+const uint8_t g_size_L1 = 20;
+const uint8_t g_size_L2 = 40;
+
+

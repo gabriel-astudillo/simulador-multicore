@@ -18,7 +18,7 @@ protected:
 	void inner_body();
 	
 public:
-	generadorTareas(const string& _name, uint32_t totalTareas);
+	generadorTareas(const string& _name, uint32_t totalTareas, double _tasaLlegada);
 	virtual ~generadorTareas();
 	void asociarProcesador(handle<Procesador> _procesador);
 };

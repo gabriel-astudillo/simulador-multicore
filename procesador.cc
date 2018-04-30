@@ -4,7 +4,7 @@
 
 
 Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name), Memoria() {
-	size_L2 = 40; /* Cantidad máxima de datos en L2 */
+	size_L2 = g_size_L2; /* Cantidad máxima de datos en L2 */
 	
 	name = _name;
 	totalCores = _totalCores;
@@ -116,7 +116,7 @@ void Procesador::asociarCores(){
 	for(uint8_t i=0; i < totalCores; i++){
 		coreSim *core;
 		
-		core = new coreSim(string("Core") + string(std::to_string(i)) );
+		core = new coreSim(string("Core") + string(std::to_string(i)) , i);
 		core->asociarProcesador(this);
 		
 		cores.push_back(core);
@@ -139,9 +139,11 @@ Procesador::~Procesador(){
 ///////////////////////////
 
 
-coreSim::coreSim(const string& _name) : process(_name), Memoria() {	
-	size_L1 = 15; /* Cantidad máxima de datos en L1 */
+coreSim::coreSim(const string& _name, uint8_t _coreID) : process(_name), Memoria() {	
+	size_L1 = g_size_L1; /* Cantidad máxima de datos en L1 */
 	name = _name;
+	coreID = _coreID;
+	
 	
 	Memoria::configuraMemoria(L1, size_L1);
 	
@@ -154,10 +156,16 @@ void coreSim::inner_body(){
 	
 	
 	while(1){
-	
+		double tIni, tFin;
+		
 		if(tarea == NULL){
+			
 			g_registro->print(this->time(), name , "Sin tarea, idle");
+			tIni = this->time();
 			passivate();
+			tFin = this->time();
+			
+			tiempoReposoCore[coreID] += tFin - tIni;
 		}
 		
 		g_registro->print(this->time(), name , \
@@ -217,9 +225,11 @@ void coreSim::inner_body(){
 						datoProcesar + \
 						string(" DATA_FAIL en L2") \
 					);
-					//Transferir desde RAM hacia L2 (hay costo de transferencia) 
+					//Transferir desde RAM hacia L2 (hay costo de transferencia) 				
+					hold( TR_RAM_L2 );
+					tiempoReposoCore[coreID] += TR_RAM_L2;
 					procesador->ponerDato(datoProcesar);
-					hold( TR_RAM_L2 );	
+					
 					g_registro->print(this->time(), name , \
 						string("PROCESAMIENTO tarea id:") + \
 						string( std::to_string(tarea->getID())) + \
@@ -230,9 +240,11 @@ void coreSim::inner_body(){
 					g_registro->print(this->time(), name , 
 						string("Memoria L2:") + procesador->verDatos());
 						
-					//Transferir desde L2 a L1 (hay costo de transferencia)		 	
-					this->ponerDato(datoProcesar);	
+					//Transferir desde L2 a L1 (hay costo de transferencia)					
 					hold( TR_L2_L1 );	
+					tiempoReposoCore[coreID] += TR_L2_L1;
+					this->ponerDato(datoProcesar);	
+					
 					g_registro->print(this->time(), name , \
 						string("PROCESAMIENTO tarea id:") + \
 						string( std::to_string(tarea->getID())) + \
@@ -254,8 +266,10 @@ void coreSim::inner_body(){
 						string(" DATA_OK en L2") \
 					);
 					//Transferir desde L2 a L1 (hay costo de transferencia)			
-					this->ponerDato(datoProcesar);	
 					hold( TR_L2_L1 );
+					tiempoReposoCore[coreID] += TR_L2_L1;
+					this->ponerDato(datoProcesar);	
+					
 					g_registro->print(this->time(), name , \
 						string("PROCESAMIENTO tarea id:") + \
 						string( std::to_string(tarea->getID())) + \
@@ -288,17 +302,28 @@ void coreSim::inner_body(){
 		tarea->setTFinServicio(this->time());
 		
 		double deltaTimeServicio = tarea->getTFinServicio() - tarea->getTInicioServicio();
+		double deltaTimeEsperaReady = tarea->getTInicioServicio() - tarea->getTCreacion();
 		
 		g_registro->print(this->time(), name, \
 			string("FIN    tarea id:") +  \
 			string(std::to_string(tarea->getID()) ) + \
-			string(" servicio:") + \
-			string( std::to_string(deltaTimeServicio) ) \
+			string(" TservicioReal:") + \
+			string( std::to_string(deltaTimeServicio) ) + \
+			string(" , TesperaReady:") + \
+			string( std::to_string(deltaTimeEsperaReady) ) \
 		);
 		
 		
 		g_tiempoServicio->update( deltaTimeServicio );
+		g_hist_tiempoServicio->update( deltaTimeServicio );
 		
+		g_tiempoEsperaReady->update( deltaTimeEsperaReady );
+		g_hist_tiempoEsperaReady->update( deltaTimeEsperaReady );
+		
+		g_tareasFinalizadas->update(1.0);
+		g_tput->update( g_tareasFinalizadas->value() / this->time() );
+		
+		tiempoUtilizadoCore[coreID] += tarea->getTservicio() ;
 		
 		tarea = NULL;
 		

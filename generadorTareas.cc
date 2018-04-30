@@ -3,8 +3,8 @@
 #include "procesador.h"
 #include "tarea.h"
 
-generadorTareas::generadorTareas(const string& _name, uint32_t _totalTareas) : process(_name) {
-	double lambda = 1.0/0.5;
+generadorTareas::generadorTareas(const string& _name, uint32_t _totalTareas, double _tasaLlegada) : process(_name) {
+	double lambda = 1.0/_tasaLlegada;
 	
 	tiempoArribo = new rngExp("Tiempo de arribo", lambda);
 	tiempoArribo->reset();
