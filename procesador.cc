@@ -110,6 +110,11 @@ void Procesador::inner_body(){
 
 void Procesador::agregarTarea(Tarea* tarea){
 	filaTareas.push_back(tarea);
+	
+	if( this->idle() && !this->estaEsperandoPorCore() ){
+		g_registro->print(this->time(), name, "Activando Procesador");
+		this->activate();
+	}
 }
 
 void Procesador::asociarCores(){

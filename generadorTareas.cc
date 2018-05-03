@@ -31,11 +31,7 @@ void generadorTareas::inner_body(){
 		
 		
 		procesador->agregarTarea(tarea);
-		
-		if( procesador->idle() && !procesador->estaEsperandoPorCore() ){
-			g_registro->print(this->time(), name, "Activando Procesador");
-			procesador->activate();
-		}
+
 			
 		tHold = tiempoArribo->value();		
 		hold(tHold);
