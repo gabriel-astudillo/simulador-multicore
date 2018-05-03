@@ -17,7 +17,7 @@ private:
 	
 	uint8_t size_L2; /*Tamaño memoria cache L2*/
 	
-	uint8_t totalCores;
+	uint32_t totalCores;
 	bool esperandoPorCore;
 	
 	void asociarCores();
@@ -27,7 +27,7 @@ protected:
 	void inner_body();
 	
 public:
-	Procesador(const string& _name, uint8_t _totalCores);	
+	Procesador(const string& _name, uint32_t _totalCores);	
 	virtual ~Procesador();
 	void agregarTarea(Tarea* tarea);
 	bool filaTareasEstaVacia();
@@ -40,7 +40,7 @@ private:
 	uint8_t size_L1; /*Tamaño memoria cache L1*/
 	
 	string name;
-	uint8_t coreID;
+	uint32_t coreID;
 	Registro *registro;
 	
 	handle<Procesador> procesador;
@@ -50,7 +50,7 @@ protected:
 	void inner_body();
 	
 public:
-	coreSim(const string& _name, uint8_t _coreID);
+	coreSim(const string& _name, uint32_t _coreID);
 	virtual ~coreSim();
 	void agregarTarea(Tarea* _tarea);
 	void asociarProcesador(handle<Procesador> _procesador);

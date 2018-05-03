@@ -6,22 +6,22 @@
 
 Registro* g_registro;
 
-double *tiempoUtilizadoCore;
-double *tiempoReposoCore;
+double *g_tiempoUtilizadoCore;
+double *g_tiempoReposoCore;
 
 class sistema: public process {
 	
 private:
 	double simLen;
 	uint32_t totalTareas;
-	uint8_t  totalCores;
+	uint32_t  totalCores;
 	double tasaLlegada;
 	
 	handle<generadorTareas> generador;
 	handle<Procesador>      procesador;
 
 public:
-	sistema( const string& _name, double _sl, uint32_t _totalTareas, uint8_t  _totalCores, double _tasaLlegada) : process( _name ) {
+	sistema( const string& _name, double _sl, uint32_t _totalTareas, uint32_t  _totalCores, double _tasaLlegada) : process( _name ) {
 			 
 		simLen      = _sl;
 		totalTareas = _totalTareas;
@@ -50,8 +50,6 @@ void sistema::inner_body( void ){
 	generador->cancel();
 	procesador->cancel();
 	
-
-	//std::cout << this->time() << std::endl;
 	end_simulation();
 
 }
@@ -60,8 +58,14 @@ int main( int argc, char* argv[] ){
 
 	check_args(argc, argv);
 	
-	tiempoUtilizadoCore = (double*) calloc(parametros.totalCores, sizeof(double) );
-	tiempoReposoCore    = (double*) calloc(parametros.totalCores, sizeof(double) );;
+	TR_L2_L1   = parametros.tr_L2_L1; //por omision: 0.30
+	TR_RAM_L2  = parametros.tr_RAM_L2;//por omision: 0.50
+	
+	g_size_L1 = parametros.size_L1;   //por omision: 20
+	g_size_L2 = parametros.size_L2;   //por omision: 40
+	
+	g_tiempoUtilizadoCore = (double*) calloc(parametros.totalCores, sizeof(double) );
+	g_tiempoReposoCore    = (double*) calloc(parametros.totalCores, sizeof(double) );;
 	
 	std::cout << "Sistema" << std::endl;
 	std::cout << "\tCores:\t\t\t" << std::to_string(parametros.totalCores) << std::endl;
@@ -96,20 +100,15 @@ int main( int argc, char* argv[] ){
 	simulation::instance()->run();
 
 	simulation::instance()->end_simulation();
-	std::cout << std::endl << "done!" << std::endl;
 	
+	printf("\nEstadisticas\n");
 	
 	try{
-		std::cout << "tiempo de Servicio\t" << \
-		g_tiempoServicio->m() << "\t"  << \
-		sqrt(g_tiempoServicio->variance()) << \
-		"\n-----" << std::endl ;
+		printf("%-15.15s%15s%15s\n", "", "Prom.", "desv." );
+		printf("%-15.15s%15.2f%15.2f\n", "t. Servicio"    , g_tiempoServicio->m()   , sqrt(g_tiempoServicio->variance()) );
+		printf("%-15.15s%15.2f%15.2f\n", "t. Espera Ready", g_tiempoEsperaReady->m(), sqrt(g_tiempoEsperaReady->variance()) );
 		
-		std::cout << "tiempo de Espera Ready\t" << \
-		g_tiempoEsperaReady->m() << "\t"  << \
-		sqrt(g_tiempoEsperaReady->variance()) << \
-		"\n-----" << std::endl ;
-		
+		puts("");
 		g_tput->report();
 		puts("-----");
 
@@ -119,10 +118,10 @@ int main( int argc, char* argv[] ){
 		//g_hist_tiempoEsperaReady->report();
 		//puts("-----");
 		
-		std::cout <<  "Core\tt. Utilizado\tt. Reposo" << std::endl;
-		for(uint8_t c=0; c<parametros.totalCores; c++){
-			double utilizacion = tiempoUtilizadoCore[c] > 0 ? (1.0 - tiempoReposoCore[c]/tiempoUtilizadoCore[c]) : 0.0;
-			printf("%4i%15f%15f%15f\n", c, tiempoUtilizadoCore[c], tiempoReposoCore[c], utilizacion);
+		std::cout <<  "Core\tt. Utilizado\tt. Reposo\tutilizacion" << std::endl;
+		for(uint32_t c=0; c<parametros.totalCores; c++){
+			double utilizacion = g_tiempoUtilizadoCore[c] > 0 ? (1.0 - g_tiempoReposoCore[c]/g_tiempoUtilizadoCore[c]) : 0.0;
+			printf("%4i%15f%15f%15f\n", c, g_tiempoUtilizadoCore[c], g_tiempoReposoCore[c], utilizacion);
 			
 			
 			//std::cout << std::to_string(c) << "\t" << tiempoUtilizadoCore[c] << "\t\t\t" << tiempoReposoCore[c] << std::endl;	

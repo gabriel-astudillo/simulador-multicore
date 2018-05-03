@@ -35,16 +35,15 @@ histogram* g_hist_tiempoEsperaReady = new histogram("Tiempo Espera Ready", 0.0, 
 /*
 *	Tiempos de transferencia
 *	entre las distintas memorias
-*	(Falta parametrizar con check_args)
 */
-const double TR_L2_L1   = 0.30;
-const double TR_RAM_L2  = 0.50;
+double TR_L2_L1;
+double TR_RAM_L2;
 
 /*
 *	Tamaños L1 y L2
 *	(Falta parametrizar con check_args)
 */
-const uint8_t g_size_L1 = 20;
-const uint8_t g_size_L2 = 40;
+uint8_t g_size_L1;// = 20;
+uint8_t g_size_L2;// = 40;
 
 

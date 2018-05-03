@@ -40,14 +40,14 @@ extern statistic* g_tput;                //throughput
 extern histogram* g_hist_tiempoServicio;
 extern histogram* g_hist_tiempoEsperaReady;
 
-extern const double TR_L2_L1;
-extern const double TR_RAM_L2;
+extern double TR_L2_L1;
+extern double TR_RAM_L2;
 
-extern const uint8_t g_size_L2;
-extern const uint8_t g_size_L1;
+extern uint8_t g_size_L2;
+extern uint8_t g_size_L1;
 
-extern double *tiempoUtilizadoCore;
-extern double *tiempoReposoCore;
+extern double *g_tiempoUtilizadoCore;
+extern double *g_tiempoReposoCore;
 
 
 

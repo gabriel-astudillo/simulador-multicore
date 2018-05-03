@@ -3,7 +3,7 @@
 #include "tarea.h"
 
 
-Procesador::Procesador(const string& _name, uint8_t _totalCores) : process(_name), Memoria() {
+Procesador::Procesador(const string& _name, uint32_t _totalCores) : process(_name), Memoria() {
 	size_L2 = g_size_L2; /* Cantidad máxima de datos en L2 */
 	
 	name = _name;
@@ -113,7 +113,7 @@ void Procesador::agregarTarea(Tarea* tarea){
 }
 
 void Procesador::asociarCores(){
-	for(uint8_t i=0; i < totalCores; i++){
+	for(uint32_t i=0; i < totalCores; i++){
 		coreSim *core;
 		
 		core = new coreSim(string("Core") + string(std::to_string(i)) , i);
@@ -139,7 +139,7 @@ Procesador::~Procesador(){
 ///////////////////////////
 
 
-coreSim::coreSim(const string& _name, uint8_t _coreID) : process(_name), Memoria() {	
+coreSim::coreSim(const string& _name, uint32_t _coreID) : process(_name), Memoria() {	
 	size_L1 = g_size_L1; /* Cantidad máxima de datos en L1 */
 	name = _name;
 	coreID = _coreID;
@@ -165,7 +165,7 @@ void coreSim::inner_body(){
 			passivate();
 			tFin = this->time();
 			
-			tiempoReposoCore[coreID] += tFin - tIni;
+			g_tiempoReposoCore[coreID] += tFin - tIni;
 		}
 		
 		g_registro->print(this->time(), name , \
@@ -187,6 +187,7 @@ void coreSim::inner_body(){
 		
 		while( !tarea->datos.empty() ){
 			char datoProcesar;
+			t_dataStatus dataStatus_L1, dataStatus_L2;
 			
 			datoProcesar = tarea->datos.front();
 			tarea->datos.pop_front();
@@ -198,9 +199,7 @@ void coreSim::inner_body(){
 				datoProcesar \
 			);
 				
-			// Revisar si datoProcesar está en L1
-			t_dataStatus dataStatus_L1, dataStatus_L2;
-			
+			// Revisar si datoProcesar está en L1						
 			dataStatus_L1 = this->buscarDato(datoProcesar);
 			
 			if( dataStatus_L1 == DATA_FAIL ){
@@ -214,7 +213,8 @@ void coreSim::inner_body(){
 				);
 				
 				// Revisar si datoProcesar está en L2
-				// Buscar el dato en L2
+				// Buscar el dato en L2 del procesador 
+				// que contiene a este core
 				dataStatus_L2 = procesador->buscarDato(datoProcesar);
 				if( dataStatus_L2 == DATA_FAIL ){
 					/* 'datoProcesar' no está en memoria L2 */
@@ -227,7 +227,7 @@ void coreSim::inner_body(){
 					);
 					//Transferir desde RAM hacia L2 (hay costo de transferencia) 				
 					hold( TR_RAM_L2 );
-					tiempoReposoCore[coreID] += TR_RAM_L2;
+					g_tiempoReposoCore[coreID] += TR_RAM_L2;
 					procesador->ponerDato(datoProcesar);
 					
 					g_registro->print(this->time(), name , \
@@ -242,7 +242,7 @@ void coreSim::inner_body(){
 						
 					//Transferir desde L2 a L1 (hay costo de transferencia)					
 					hold( TR_L2_L1 );	
-					tiempoReposoCore[coreID] += TR_L2_L1;
+					g_tiempoReposoCore[coreID] += TR_L2_L1;
 					this->ponerDato(datoProcesar);	
 					
 					g_registro->print(this->time(), name , \
@@ -267,7 +267,7 @@ void coreSim::inner_body(){
 					);
 					//Transferir desde L2 a L1 (hay costo de transferencia)			
 					hold( TR_L2_L1 );
-					tiempoReposoCore[coreID] += TR_L2_L1;
+					g_tiempoReposoCore[coreID] += TR_L2_L1;
 					this->ponerDato(datoProcesar);	
 					
 					g_registro->print(this->time(), name , \
@@ -323,7 +323,7 @@ void coreSim::inner_body(){
 		g_tareasFinalizadas->update(1.0);
 		g_tput->update( g_tareasFinalizadas->value() / this->time() );
 		
-		tiempoUtilizadoCore[coreID] += tarea->getTservicio() ;
+		g_tiempoUtilizadoCore[coreID] += tarea->getTservicio() ;
 		
 		tarea = NULL;
 		
