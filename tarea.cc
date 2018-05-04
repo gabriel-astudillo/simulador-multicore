@@ -21,7 +21,7 @@ Tarea::Tarea(uint32_t _id, double _tiempoCreacion){
 
 
 void Tarea::asignarDatos(){
-	for(uint8_t i=0; i < rand()%10; i++){
+	for(uint8_t i=0; i < 1+rand()%10; i++){
 		agregarDato(65+rand()%10);
 	}
 }
