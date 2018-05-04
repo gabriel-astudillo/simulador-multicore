@@ -328,7 +328,7 @@ void coreSim::inner_body(){
 		g_tareasFinalizadas->update(1.0);
 		g_tput->update( g_tareasFinalizadas->value() / this->time() );
 		
-		g_tiempoUtilizadoCore[coreID] += tarea->getTservicio() ;
+		g_tiempoUtilizadoCore[coreID] += deltaTimeServicio ;
 		
 		tarea = NULL;
 		
