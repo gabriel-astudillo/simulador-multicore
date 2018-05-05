@@ -7,7 +7,8 @@ class Tarea {
 private:
 	uint32_t id;
 	double tServicio;
-	
+	list<char> datos;
+		
 	double tiempoCreacion;
 	double tiempoInicioServicio;
 	double tiempoFinServicio;
@@ -19,8 +20,6 @@ protected:
 	
 	
 public:
-	list<char> datos;
-	
 	Tarea(uint32_t _id, double _tiempoCreacion);
 
 	uint32_t getID();
@@ -29,6 +28,9 @@ public:
 	
 	void setTInicioServicio(double tiempoInicio);
 	void setTFinServicio(double finServicio);
+
+	bool quedanDatos();
+	char getProxDato();
 	
 	double getTCreacion();
 	double getTInicioServicio();

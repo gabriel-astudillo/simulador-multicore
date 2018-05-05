@@ -190,9 +190,13 @@ void coreSim::inner_body(){
 		*/	
 		tarea->setTInicioServicio(this->time());
 		
+		//while( !tarea->datos.empty() ){
 		while( tarea->quedanDatos() ){
 			char datoProcesar;
 			t_dataStatus dataStatus_L1, dataStatus_L2;
+			
+			//datoProcesar = tarea->datos.front();
+			//tarea->datos.pop_front();
 			
 			datoProcesar = tarea->getProxDato();
 			
